@@ -11,12 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:newsapp/model/liked.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => LikedArticlesProvider(),
-      child: MyApp(),
-    ),
-  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -24,18 +19,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const MyRegisterPage(),
-      darkTheme: darktheme,
-      theme: lighttheme,
-      initialRoute: 'home/',
-      routes: {
-        'category/': (context) => const Category(),
-        'home/': (context) => const BottomNav(),
-        'login/': (context) => const LoginPage(),
-        'register/': (context) => const MyRegisterPage()
-      },
+    return ChangeNotifierProvider(
+      create: (context) => LikedArticlesProvider(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const MyRegisterPage(),
+        darkTheme: darktheme,
+        theme: lighttheme,
+        initialRoute: 'home/',
+        routes: {
+          'category/': (context) => const Category(),
+          'home/': (context) => const BottomNav(),
+          'login/': (context) => const LoginPage(),
+          'register/': (context) => const MyRegisterPage()
+        },
+      ),
     );
   }
 }

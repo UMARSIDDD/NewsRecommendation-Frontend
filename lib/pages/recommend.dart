@@ -19,15 +19,19 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
   ];
   List<Map<String, dynamic>> _recommendedArticles = [];
   bool _isSearching = true; // Track if user is searching
+  bool isLoading = false;
 
   void someFunction(BuildContext context) {}
 
   Future<void> _getRecommendations(BuildContext context) async {
+    setState(() {
+      isLoading = true;
+    });
     List<String> likedArticles =
         Provider.of<LikedArticlesProvider>(context, listen: false)
             .likedArticles;
     const String apiUrl =
-        'https://2162-103-186-54-115.ngrok-free.app/recommend_news/'; // Update with your FastAPI server address
+        'https://f024-103-186-54-115.ngrok-free.app/recommend_news/'; // Update with your FastAPI server address
 
     try {
       final response = await http.post(
@@ -59,6 +63,10 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
       }
     } catch (e) {
       print('Error: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -71,111 +79,118 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Recommendation Screen'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          children: [
-            Visibility(
-              visible: _isSearching,
-              // Show search bar only if user is searching
+    return isLoading
+        ? Center(
+            child: CircularProgressIndicator(
+            color: Colors.blue,
+          ))
+        : Scaffold(
+            appBar: AppBar(
+              title: const Text('Recommendation Screen'),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                children: [
+                  // Visibility(
+                  //   visible: _isSearching,
+                  //   // Show search bar only if user is searching
 
-              child: TextField(
-                controller: _activityController,
-                decoration: InputDecoration(
-                  hintText: "Enter Your User Activity",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(18),
-                      borderSide: BorderSide.none),
-                  fillColor: Colors.purple.withOpacity(0.1),
-                  filled: true,
-                ),
-                onChanged: (value) {
-                  // Add or remove user activities based on user input
-                  if (value.isNotEmpty && !_userActivities.contains(value)) {
-                    setState(() {
-                      _userActivities.add(value);
-                    });
-                  } else if (value.isEmpty && _userActivities.isNotEmpty) {
-                    setState(() {
-                      _userActivities.clear();
-                    });
-                  }
-                },
-              ),
-            ),
-            SizedBox(
-              height: 40,
-            ),
-            ElevatedButton(
-              onPressed: () {},
-              child: const Text(
-                'Get Recommendations',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ButtonStyle(
-                backgroundColor:
-                    MaterialStateProperty.all<Color>((Colors.purple)),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _recommendedArticles.length,
-                itemBuilder: (context, index) {
-                  final article = _recommendedArticles[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide.none,
-                    ),
-                    elevation: 5,
-                    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (article.containsKey('urlToImage') &&
-                            article['urlToImage'] != null)
-                          Image.network(
-                            article['urlToImage'],
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 200,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Center(child: Text('Image not available'));
-                            },
+                  //   child: TextField(
+                  //     controller: _activityController,
+                  //     decoration: InputDecoration(
+                  //       hintText: "Enter Your User Activity",
+                  //       border: OutlineInputBorder(
+                  //           borderRadius: BorderRadius.circular(18),
+                  //           borderSide: BorderSide.none),
+                  //       fillColor: Colors.purple.withOpacity(0.1),
+                  //       filled: true,
+                  //     ),
+                  //     onChanged: (value) {
+                  //       // Add or remove user activities based on user input
+                  //       if (value.isNotEmpty && !_userActivities.contains(value)) {
+                  //         setState(() {
+                  //           _userActivities.add(value);
+                  //         });
+                  //       } else if (value.isEmpty && _userActivities.isNotEmpty) {
+                  //         setState(() {
+                  //           _userActivities.clear();
+                  //         });
+                  //       }
+                  //     },
+                  //   ),
+                  // ),
+                  // SizedBox(
+                  //   height: 40,
+                  // ),
+                  // ElevatedButton(
+                  //   onPressed: () {},
+                  //   child: const Text(
+                  //     'Get Recommendations',
+                  //     style: TextStyle(color: Colors.white),
+                  //   ),
+                  //   style: ButtonStyle(
+                  //     backgroundColor:
+                  //         MaterialStateProperty.all<Color>((Colors.purple)),
+                  //   ),
+                  // ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _recommendedArticles.length,
+                      itemBuilder: (context, index) {
+                        final article = _recommendedArticles[index];
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide.none,
                           ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          elevation: 5,
+                          margin:
+                              EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                article['title'] ?? 'No Title',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
+                              if (article.containsKey('urlToImage') &&
+                                  article['urlToImage'] != null)
+                                Image.network(
+                                  article['urlToImage'],
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: 200,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Center(
+                                        child: Text('Image not available'));
+                                  },
                                 ),
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                article['description'] ?? '',
-                                style: TextStyle(fontSize: 16),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      article['title'] ?? 'No Title',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      article['description'] ?? '',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
+          );
   }
 }

@@ -21,11 +21,10 @@ class _BottomNavState extends State<BottomNav> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
     const HomeScreen(),
-    const Screen3(),
+    const RecommendationScreen(),
     const ocr_text_recognize(),
     const SearchCategory(),
     const Profile(),
-    const RecommendationScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -40,47 +39,49 @@ class _BottomNavState extends State<BottomNav> {
         backgroundColor: Theme.of(context).colorScheme.background,
         body: _screens[_selectedIndex],
         bottomNavigationBar: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Container(
-            // color: Colors.black,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-              child: GNav(
-                  // padding: EdgeInsets.all(),
-                  onTabChange: (index) => _onItemTapped(index),
-                  // backgroundColor: Colors.black,
-                  activeColor: Colors.white,
-                  color: Colors.purple,
-                  tabBackgroundColor: Colors.purple,
-                  padding: const EdgeInsets.all(16),
-                  gap: 8,
-                  tabs: const [
-                    GButton(
-                      icon: Icons.home,
-                      text: "Home",
-                    ),
-                    GButton(
-                      icon: Icons.favorite_border,
-                      text: "Like",
-                    ),
-                    GButton(
-                      icon: Icons.camera,
-                      text: "OCR",
-                    ),
-                    GButton(
-                      icon: Icons.search,
-                      text: 'Search',
-                    ),
-                    GButton(
-                      icon: Icons.person,
-                      text: 'Profile',
-                    ),
-                    GButton(
-                      icon: Icons.receipt,
-                      text: 'Recommendation',
-                    ),
-                  ]),
-            ),
+          scrollDirection: Axis.vertical,
+          child: Column(
+            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                // color: Colors.black,
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  child: GNav(
+                      // padding: EdgeInsets.all(),
+                      onTabChange: (index) => _onItemTapped(index),
+                      // backgroundColor: Colors.black,
+                      activeColor: Colors.white,
+                      color: Colors.purple,
+                      tabBackgroundColor: Colors.purple,
+                      padding: const EdgeInsets.all(16),
+                      gap: 8,
+                      tabs: const [
+                        GButton(
+                          icon: Icons.home,
+                          text: "Home",
+                        ),
+                        GButton(
+                          icon: Icons.receipt,
+                          text: 'Recomm',
+                        ),
+                        GButton(
+                          icon: Icons.camera,
+                          text: "OCR",
+                        ),
+                        GButton(
+                          icon: Icons.search,
+                          text: 'Search',
+                        ),
+                        GButton(
+                          icon: Icons.person,
+                          text: 'Profile',
+                        ),
+                      ]),
+                ),
+              ),
+            ],
           ),
         ));
   }

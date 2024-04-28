@@ -55,9 +55,9 @@ class _ProfileState extends State<Profile> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            imageprofile(),
-            const Text("Umar"),
-            const Text("umar@gmail.com"),
+            // imageprofile(),
+            // const Text("Umar"),
+            // const Text("umar@gmail.com"),
             sizedH(context, 0.03),
             ProfileTile(
               height: height,

@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
 
-class Categorys {
+class Categorys { 
   final String image;
   final String name;
   bool isSelected;

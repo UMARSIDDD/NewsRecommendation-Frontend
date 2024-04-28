@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:newsapp/constant/constant.dart';
 import 'package:newsapp/model/liked.dart';
 import 'package:newsapp/model/newsModelHeadline.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 class HomeScreenState extends State<HomeScreen> {
   List<String> categories = ['Technology', 'science', 'sports', 'politics'];
   // List<String> likedArticle = [];
+  var fakeNewsUrl = "${Apiurl.backendUrl}/fake-news/detect_fake_news/";
 
   final String apiUrl =
       // 'https://newsapi.org/v2/top-headlines?country=us&apiKey=96b9899434d04821acdb41e4e74be3ce';
@@ -92,6 +94,65 @@ class HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+//Fake news implemnation
+
+// Future<void> fetchRandomNews() async {
+//   setState(() {
+//     isLoading = true;
+//   });
+//   try {
+//     final randomCategory = getRandomCategory();
+
+//     final response = await http.get(
+//       Uri.parse(
+//           // 'https://newsapi.org/v2/top-headlines?country=us&category=$randomCategory&apiKey=96b9899434d04821acdb41e4e74be3ce'),
+//           // "https://newsapi.org/v2/everything?sources=the-times-of-india&apiKey=f920a5d9981e42de91c052c8471db7a2";
+//           apiUrl),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final data = json.decode(response.body);
+//       isLoading = true;
+//       setState(() {
+//         newsEver = data['articles']
+//             .map<Article>((evernew) => (Article.fromJson(evernew)))
+//             .toList();
+//         // print(newsEver);
+//       });
+//       Provider.of<LikedArticlesProvider>(context, listen: false)
+//           .initLikedStates(newsEver.length);
+
+//       // Send news response to the fake news URL
+//       for (var news in newsEver) {
+//         final newsResponse = await http.post(
+//           Uri.parse(fakeNewsUrl),
+//           body: jsonEncode({'news': news.title}), // Assuming 'title' is the field containing the news content
+//           headers: {'Content-Type': 'application/json'},
+//         );
+
+//         if (newsResponse.statusCode == 200) {
+//           final responseData = json.decode(newsResponse.body);
+//           final int responseCode = responseData['response'];
+
+//           if (responseCode == 1) {
+//             // Show only the news whose response is 1
+//             setState(() {
+//               newsData.add(news);
+//             });
+//           }
+//         } else {
+//           throw Exception('Failed to send news response');
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     print('Error fetching news: $error');
+//   } finally {
+//     setState(() {
+//       isLoading = false;
+//     });
+//   }
+// }
 
   bool _liked = false;
   bool _unliked = false;
@@ -102,17 +163,17 @@ class HomeScreenState extends State<HomeScreen> {
     var height = MediaQuery.of(context).size.height;
     final likedProvider = Provider.of<LikedArticlesProvider>(context);
 
-    return isLoading
+    return Scaffold(
+            appBar: AppBar(
+              title: const Text('TOP NEWS'),
+              centerTitle: true,
+            ),
+            body:  isLoading
         ? Center(
             child: CircularProgressIndicator(
             color: Colors.blue,
           ))
-        : Scaffold(
-            appBar: AppBar(
-              title: const Text('Newss'),
-              centerTitle: true,
-            ),
-            body: Padding(
+        :Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 children: [
@@ -130,6 +191,11 @@ class HomeScreenState extends State<HomeScreen> {
                           final item = newsEver[index];
                           return InkWell(
                               onTap: () async {
+                                String title = item.title;
+                                Provider.of<LikedArticlesProvider>(
+                                                            context,
+                                                            listen: false)
+                                                        .addLikedArticle(title);
                                 final url = Uri.parse(item.url);
                                 if (await canLaunchUrl(url)) {
                                   await launchUrl(url);
@@ -193,8 +259,16 @@ class HomeScreenState extends State<HomeScreen> {
                                           const SizedBox(height: 10.0),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [Text(
+                                            item.publishedAt ??
+                                                "No Description Available",
+                                            maxLines: 1,
+                                            
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+
                                               IconButton(
                                                 icon: Icon(
                                                   likedProvider
@@ -274,7 +348,8 @@ class HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ],
                                 ),
-                              ));
+                              )
+                              );
                         },
                       ),
                     ),

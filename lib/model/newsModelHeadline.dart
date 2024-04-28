@@ -1,6 +1,8 @@
 // ignore_for_file: unused_import, constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 
 class Article {
   final String sourceName;
@@ -12,6 +14,8 @@ class Article {
   final String publishedAt;
   final String content;
   bool isLiked;
+
+  var response;
 
   Article(
       {required this.title,
@@ -25,6 +29,9 @@ class Article {
       this.isLiked = false});
 
   factory Article.fromJson(Map<String, dynamic> json) {
+    String dateString = json['publishedAt'];
+    DateTime dateTime = DateTime.parse(dateString);
+String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
     const String ImageError =
         'https://play-lh.googleusercontent.com/8LYEbSl48gJoUVGDUyqO5A0xKlcbm2b39S32xvm_h-8BueclJnZlspfkZmrXNFX2XQ';
     return Article(
@@ -32,7 +39,7 @@ class Article {
       title: json['title'] ?? '',
       url: json['url'] ?? '',
       author: json['author'] ?? '',
-      publishedAt: json['publishedAt'] ?? '',
+      publishedAt: formattedDate ?? '',
       sourceName: json['source']['name'] ?? '',
       urlToImage: json['urlToImage'] ?? ImageError,
       content: json['content'] ?? '',

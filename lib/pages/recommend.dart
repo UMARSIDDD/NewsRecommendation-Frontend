@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:newsapp/constant/constant.dart';
 import 'package:newsapp/model/liked.dart';
 import 'package:provider/provider.dart';
+import 'package:newsapp/model/liked.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RecommendationScreen extends StatefulWidget {
   final List<String>? likedarticle;
@@ -14,9 +17,7 @@ class RecommendationScreen extends StatefulWidget {
 
 class _RecommendationScreenState extends State<RecommendationScreen> {
   TextEditingController _activityController = TextEditingController();
-  List<String> _userActivities = [
-    'IPL Live: Struggling RCB face high-flying Rajasthan Royals, IPL Live: Struggling RCB face high-flying Rajasthan Royals, IPL Live: Struggling RCB face high-flying Rajasthan Royals'
-  ];
+  List<String> _userActivities = [];
   List<Map<String, dynamic>> _recommendedArticles = [];
   bool _isSearching = true; // Track if user is searching
   bool isLoading = false;
@@ -30,8 +31,8 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
     List<String> likedArticles =
         Provider.of<LikedArticlesProvider>(context, listen: false)
             .likedArticles;
-    const String apiUrl =
-        'https://f024-103-186-54-115.ngrok-free.app/recommend_news/'; // Update with your FastAPI server address
+    String apiUrl =
+        '${Apiurl.backendUrl}//recommend_news/'; // Update with your FastAPI server address
 
     try {
       final response = await http.post(
@@ -79,16 +80,16 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
+    return Scaffold(
+            appBar: AppBar(
+              title: const Text('Recommendation Screen'),
+            ),
+            body:  isLoading
         ? Center(
             child: CircularProgressIndicator(
             color: Colors.blue,
           ))
-        : Scaffold(
-            appBar: AppBar(
-              title: const Text('Recommendation Screen'),
-            ),
-            body: Padding(
+        : Padding(
               padding: const EdgeInsets.all(15.0),
               child: Column(
                 children: [
@@ -121,7 +122,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                   //   ),
                   // ),
                   // SizedBox(
-                  //   height: 40,
+                  //   height: 60,
                   // ),
                   // ElevatedButton(
                   //   onPressed: () {},
@@ -139,52 +140,69 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                       itemCount: _recommendedArticles.length,
                       itemBuilder: (context, index) {
                         final article = _recommendedArticles[index];
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: BorderSide.none,
-                          ),
-                          elevation: 5,
-                          margin:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (article.containsKey('urlToImage') &&
-                                  article['urlToImage'] != null)
-                                Image.network(
-                                  article['urlToImage'],
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: 200,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Center(
-                                        child: Text('Image not available'));
-                                  },
-                                ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      article['title'] ?? 'No Title',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      article['description'] ?? '',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                  ],
-                                ),
+                        return InkWell(
+                          onTap: () async {
+        final url = Uri.parse(article['url']); 
+        // ignore: deprecated_member_use
+        if (await canLaunch(url.toString())) {
+          // ignore: deprecated_member_use
+          await launch(url.toString());
+        } else {
+          print("Can't launch $url");
+        }
+      },
+      
+                          child: Container(
+                             margin: EdgeInsets.symmetric(vertical: 20),
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: BorderSide.none,
                               ),
-                            ],
+                              elevation: 5,
+                              margin:
+                                  EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (article.containsKey('urlToImage') &&
+                                      article['urlToImage'] != null)
+                                    Image.network(
+                                      article['urlToImage'],
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: 200,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Center(
+                                            child: Text('Image not available'));
+                                      },
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          article['title'] ?? 'No Title',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8),
+                                        Text(
+                                          article['description'] ?? '',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         );
+                      
                       },
                     ),
                   ),

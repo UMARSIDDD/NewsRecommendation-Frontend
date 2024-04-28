@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:newsapp/constant/constant.dart';
+import '../constant/constant.dart';
 // import 'package:newsapp/Widget/TextFields.dart';
 // import 'package:newsia/Components/Buttons.dart';
 
@@ -16,17 +18,23 @@ class MyRegisterPage extends StatefulWidget {
 }
 
 class _MyRegisterPageState extends State<MyRegisterPage> {
+  bool isLoading =false;
   final emailTextController = TextEditingController();
   final passwordController = TextEditingController();
   final confirPasswordController = TextEditingController();
   final InterestTextcontroller = TextEditingController();
   Future<void> submit(email, password, interest) async {
+    setState(() {
+      isLoading=true;
+    });
     final body = {
       'email': email.toString(),
       'password': password.toString(),
       'topic': interest.toString(),
     };
-    const url = 'https://9614-103-248-31-54.ngrok-free.app/Register/';
+    // const url = 'https://88fc-103-248-31-51.ngrok-free.app/Register/';
+    var url = '${Apiurl.backendUrl.toString()}/Register/';
+    // http.get(Uri.parse('${Constant.backendUrl}videos'));
     final uri = Uri.parse(url);
     final response = await http.post(
       uri,
@@ -34,6 +42,9 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
     );
 
     if (response.statusCode == 201) {
+      setState(() {
+        isLoading=false;
+      });
       Navigator.pushReplacementNamed(context, 'login/');
     } else {
       print("Register error");
@@ -118,7 +129,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                     TextField(
                       controller: InterestTextcontroller,
                       decoration: InputDecoration(
-                          hintText: "Intrested Topic",
+                          hintText: "Interested Topic",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(18),
                               borderSide: BorderSide.none),
@@ -138,7 +149,8 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                         String confirmpass = confirPasswordController.text;
                         String interest = InterestTextcontroller.text;
                         if (password == confirmpass) {
-                          submit(email, password, interest);
+
+                          isLoading?null: submit(email, password, interest);
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -146,7 +158,7 @@ class _MyRegisterPageState extends State<MyRegisterPage> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: Colors.purple,
                       ),
-                      child: const Text(
+                      child:  Text(
                         "Sign up",
                         style: TextStyle(fontSize: 20),
                       ),

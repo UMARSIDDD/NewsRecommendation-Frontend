@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import for using Clipboard
 
 import 'package:http/http.dart' as http;
+import 'package:newsapp/constant/constant.dart';
 import 'dart:convert';
+
+import 'package:permission_handler/permission_handler.dart';
 
 class ResultScreen extends StatefulWidget {
   final String scanText;
@@ -14,36 +17,41 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
-  //  String? summaryText;
-  String summaryText = '';
+  String? summaryText;
   bool isLoading = false;
 
-  Future<void> sendDesc(desc) async {
-    // String text = desc.replaceAll("\n", "");
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> sendDesc(String desc) async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       String text = desc.replaceAll("\n", "");
-
-      // Replace " with an empty string
       text = text.replaceAll('"', "");
       final body = {'text': text};
-      const url =
-          'https://f024-103-186-54-115.ngrok-free.app/text-summarizer/summarize/';
+      var url =
+          '${Apiurl.backendUrl}/text-summarizer/summarize/';
       final uri = Uri.parse(url);
-      print(uri);
       final response = await http.post(
         uri,
         body: body,
       );
-      print(response.body);
-
+      print(response.statusCode);
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         setState(() {
           summaryText = data['result']['summary_text'];
         });
-        // print(data['result']['summary_text']);
-        print("OK");
-        // Navigator.pushReplacementNamed(context, 'login/');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SummaryScreen(summaryText: summaryText!),
+          ),
+        );
       }
     } catch (error) {
       print("error");
@@ -55,84 +63,87 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   @override
-  Widget build(BuildContext context)
-  // String scannedTExt=scanText;
-  {
-    return isLoading
-        ? Center(
-            child: CircularProgressIndicator(
-            color: Colors.blue,
-          ))
-        : Scaffold(
-            appBar: AppBar(
-              title: const Text('Result'),
-            ),
-            body: SingleChildScrollView(
-              child: Container(
-                padding: const EdgeInsets.all(30.0),
-                child: Column(
-                  children: [
-                    Text(widget.scanText),
-                    SizedBox(height: 20),
-                    summaryText != null
-                        ? Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(summaryText!),
-                            ),
-                          )
-                        : Container(), // Show card only when summaryText is available
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // sendDesc();
-                            Clipboard.setData(
-                                ClipboardData(text: widget.scanText));
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                              content: Text('Copied to clipboard'),
-                            ));
-                          },
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.blue),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Result'),
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            children: [
+              Text(widget.scanText),
+              SizedBox(height: 20),
+              isLoading
+                  ? CircularProgressIndicator(
+                      color: Colors.blue,
+                    )
+                  : summaryText != null
+                      ? Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(summaryText!),
                           ),
-                          child: Text('Copy'),
-                        ),
-                        SizedBox(width: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            print(widget.scanText);
-                            sendDesc(widget.scanText);
-                            Clipboard.getData(Clipboard.kTextPlain)
-                                .then((value) {
-                              if (value != null) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text('Copied Text: ${value.text}'),
-                                ));
-                              } else {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(
-                                  content: Text('Clipboard is empty'),
-                                ));
-                              }
-                            });
-                          },
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.blue),
-                          ),
-                          child: Text('Send'),
-                        ),
-                      ],
+                        )
+                      : Container(), // Show card only when summaryText is available
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Clipboard.setData(
+                          ClipboardData(text: widget.scanText));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Copied to clipboard'),
+                      ));
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.blue),
                     ),
-                  ],
-                ),
+                    child: Text('Copy'),
+                  ),
+                  SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      sendDesc(widget.scanText);
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.blue),
+                    ),
+                    child: Text('Send'),
+                  ),
+                ],
               ),
-            ),
-          );
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SummaryScreen extends StatelessWidget {
+  final String summaryText;
+
+  const SummaryScreen({Key? key, required this.summaryText}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    print(summaryText);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Summary'),
+      ),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.all(30.0),
+          child: Text(summaryText),
+        ),
+      ),
+    );
   }
 }

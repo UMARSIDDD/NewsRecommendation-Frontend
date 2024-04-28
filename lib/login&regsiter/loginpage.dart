@@ -15,14 +15,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool isLoading=false;
   final emailTextController = TextEditingController();
   final passwordController = TextEditingController();
   Future<void> submit(email, password) async {
+    setState(() {
+      isLoading=true;
+    });
     final body = {
       'username': email.toString(),
       'password': password.toString(),
     };
-    const url = 'https://9614-103-248-31-54.ngrok-free.app/Login/';
+    const url = 'https://88fc-103-248-31-51.ngrok-free.app/Login/';
     final uri = Uri.parse(url);
     final response = await http.post(
       uri,
@@ -30,7 +34,10 @@ class _LoginPageState extends State<LoginPage> {
     );
     print(response.statusCode);
     if (response.statusCode == 200) {
-      Navigator.pushReplacementNamed(context, 'category/');
+      setState(() {
+        isLoading=false;
+      });
+      Navigator.pushReplacementNamed(context, 'home/');
     } else {
       print("login error");
     }
@@ -104,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
             String email = emailTextController.text;
             String password = passwordController.text;
 
-            submit(email, password);
+            isLoading?null:submit(email, password);
             // Navigator.pushReplacementNamed(context, 'category/');
           },
           style: ElevatedButton.styleFrom(
@@ -112,8 +119,8 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.symmetric(vertical: 16),
             backgroundColor: Colors.purple,
           ),
-          child: const Text(
-            "Login",
+          child:  Text(
+"Login",
             style: TextStyle(fontSize: 20),
           ),
         )
@@ -125,7 +132,7 @@ class _LoginPageState extends State<LoginPage> {
     return TextButton(
       onPressed: () {},
       child: const Text(
-        "Forgot password?",
+        "",
         style: TextStyle(color: Colors.purple),
       ),
     );
